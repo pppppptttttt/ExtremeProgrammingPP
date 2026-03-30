@@ -33,7 +33,7 @@ ExtremeProgrammingPP/
 ├── settings.gradle.kts
 ├── gradlew
 └── gradlew.bat
-````
+```
 
 ## Требования к окружению
 
@@ -44,7 +44,7 @@ ExtremeProgrammingPP/
 
 ## Сборка проекта
 
-### Linux / macOS
+### Linux
 
 ```bash
 ./gradlew clean build
@@ -58,7 +58,7 @@ ExtremeProgrammingPP/
 
 ## Запуск тестов
 
-### Linux / macOS
+### Linux
 
 ```bash
 ./gradlew test
@@ -74,7 +74,7 @@ ExtremeProgrammingPP/
 
 Чтобы проверить, что приложение корректно стартует и CLI доступен:
 
-### Linux / macOS
+### Linux
 
 ```bash
 ./gradlew run --args="--help"
@@ -94,16 +94,16 @@ ExtremeProgrammingPP/
 
 Пример:
 
-#### Linux / macOS
+#### Linux
 
 ```bash
-./gradlew run --args="--name Alice --port 50051"
+./gradlew run --args="--name Alice --listen-port 50051"
 ```
 
 #### Windows
 
 ```powershell
-.\gradlew.bat run --args="--name Alice --port 50051"
+.\gradlew.bat run --args="--name Alice --listen-port 50051"
 ```
 
 * приложение стартует;
@@ -114,7 +114,7 @@ ExtremeProgrammingPP/
 
 Пример:
 
-#### Linux / macOS
+#### Linux
 
 ```bash
 ./gradlew run --args="--name Bob --peer-host 127.0.0.1 --peer-port 50051"

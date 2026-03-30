@@ -41,15 +41,19 @@ jobs:
         if: runner.os != 'Windows'
         run: chmod +x ./gradlew
 
-      - name: Assemble project (Linux/macOS)
+      - name: Assemble project (Linux)
         if: runner.os != 'Windows'
         run: ./gradlew --no-daemon assemble
 
-      - name: Run tests (Linux/macOS)
+      - name: Run tests (Linux)
         if: runner.os != 'Windows'
         run: ./gradlew --no-daemon test
 
-      - name: Smoke run application (Linux/macOS)
+      - name: E2E tests (Linux)
+        if: runner.os != 'Windows'
+        run: ./gradlew --no-daemon e2eTest
+
+      - name: Smoke run application (Linux)
         if: runner.os != 'Windows'
         run: ./gradlew --no-daemon run --args="--help"
 
@@ -60,6 +64,10 @@ jobs:
       - name: Run tests (Windows)
         if: runner.os == 'Windows'
         run: .\gradlew.bat --no-daemon test
+
+      - name: E2E tests (Windows)
+        if: runner.os == 'Windows'
+        run: .\gradlew.bat --no-daemon e2eTest
 
       - name: Smoke run application (Windows)
         if: runner.os == 'Windows'
