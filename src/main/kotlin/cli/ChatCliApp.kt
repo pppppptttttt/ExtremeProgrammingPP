@@ -13,7 +13,8 @@ import kotlinx.coroutines.withContext
 
 class ChatCliApp(
     private val transport: ChatTransport,
-    private val renderer: ConsoleRenderer = ConsoleRenderer()
+    private val renderer: ConsoleRenderer = ConsoleRenderer(),
+    private val readLineFn: () -> String? = ::readLine,
 ) {
     suspend fun run(args: AppArgs) = coroutineScope {
         val eventJob = launch {
@@ -57,7 +58,7 @@ class ChatCliApp(
 
     private suspend fun inputLoop(selfName: String) = withContext(Dispatchers.IO) {
         while (currentCoroutineContext().isActive) {
-            val line = readLine() ?: break
+            val line = readLineFn() ?: break
             val trimmed = line.trim()
 
             if (trimmed.isEmpty()) {
