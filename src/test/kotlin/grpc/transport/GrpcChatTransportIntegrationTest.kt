@@ -6,9 +6,12 @@ import domain.command.StartServerCommand
 import domain.model.ChatEvent
 import domain.model.PeerInfo
 import java.net.ServerSocket
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 
@@ -38,7 +41,15 @@ class GrpcChatTransportIntegrationTest {
         }
         try {
             server.startServer(StartServerCommand("alice", port))
+            // UNDISPATCHED: подписаться на Connected до connect(), иначе на Windows событие
+            // может уйти до first(), и withTimeout зависнет до 10s.
+            val serverReady = launch(start = CoroutineStart.UNDISPATCHED) {
+                withTimeout(10_000) {
+                    server.events.first { it is ChatEvent.Connected }
+                }
+            }
             client.connect(ConnectCommand("bob", PeerInfo("127.0.0.1", port)))
+            serverReady.join()
             repeat(3) { i ->
                 client.send(SendMessageCommand("bob", "from-client-$i"))
             }
