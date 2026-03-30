@@ -16,7 +16,6 @@ import java.net.SocketAddress
  * Кладёт remote-адрес TCP в [io.grpc.Context] до вызова `ChatService/chat`.
  */
 class PeerAddressInterceptor : ServerInterceptor {
-
     override fun <ReqT, RespT> interceptCall(
         call: ServerCall<ReqT, RespT>,
         headers: Metadata,

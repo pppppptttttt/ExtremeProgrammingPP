@@ -24,11 +24,13 @@ class ChatGrpcServer(
     fun start() {
         check(server == null) { "Server already started" }
         val socket = InetSocketAddress(bindHost, port)
-        val built = NettyServerBuilder.forAddress(socket).apply {
-            interceptors.forEach { intercept(it) }
-        }
-            .addService(service)
-            .build()
+        val built =
+            NettyServerBuilder
+                .forAddress(socket)
+                .apply {
+                    interceptors.forEach { intercept(it) }
+                }.addService(service)
+                .build()
         built.start()
         server = built
         logger.info("gRPC server listening on $bindHost:${boundPort()}")
