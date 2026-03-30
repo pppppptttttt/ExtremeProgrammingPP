@@ -30,6 +30,7 @@ kotlin {
 }
 
 tasks.test {
+<<<<<<< HEAD
     useJUnitPlatform {
         excludeTags("e2e")
     }
@@ -54,3 +55,7 @@ tasks.register<Test>("e2eTest") {
         systemProperty("e2e.binary", binary.absolutePath)
     }
 }
+=======
+    useJUnitPlatform()
+}
+>>>>>>> 8cc034c (add ktlint)
