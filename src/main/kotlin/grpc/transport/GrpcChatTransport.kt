@@ -7,13 +7,12 @@ import domain.model.ChatEvent
 import domain.model.ChatMessage
 import domain.model.PeerInfo
 import domain.port.ChatTransport
+import grpc.interceptor.GrpcPeerContext
+import grpc.interceptor.PeerAddressInterceptor
 import grpc.server.ChatGrpcServer
-import io.grpc.Grpc
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
-import io.grpc.stub.ServerCallStreamObserver
 import io.grpc.stub.StreamObserver
-import java.net.InetSocketAddress
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
@@ -66,8 +65,13 @@ class GrpcChatTransport : ChatTransport {
             check(mode == Mode.IDLE) { "Transport already active" }
             mode = Mode.SERVER
         }
-        val service = ChatTransportGrpcService(this)
-        val server = ChatGrpcServer("0.0.0.0", command.port, service)
+        val service = ChatTransportGrpcService(this@GrpcChatTransport)
+        val server = ChatGrpcServer(
+            bindHost = "0.0.0.0",
+            port = command.port,
+            service = service,
+            interceptors = listOf(PeerAddressInterceptor()),
+        )
         synchronized(lock) {
             grpcServer = server
         }
@@ -116,6 +120,7 @@ class GrpcChatTransport : ChatTransport {
         scope.launch {
             _events.emit(ChatEvent.Connected(peer))
         }
+        Unit
     }
 
     override suspend fun send(command: SendMessageCommand): ChatMessage = withContext(Dispatchers.IO) {
@@ -157,6 +162,7 @@ class GrpcChatTransport : ChatTransport {
                 _events.emit(ChatEvent.Disconnected(p))
             }
         }
+        Unit
     }
 
     override fun close() {
@@ -167,7 +173,7 @@ class GrpcChatTransport : ChatTransport {
     }
 
     internal fun tryAttachServerOutgoing(responseObserver: StreamObserver<ProtoChatMessage>): Boolean {
-        val peer = extractRemotePeer(responseObserver)
+        val peer = GrpcPeerContext.PEER_INFO.get() ?: serverConnectedPeerPlaceholder()
         synchronized(lock) {
             if (mode != Mode.SERVER || outgoing != null) {
                 return false
@@ -224,21 +230,6 @@ class GrpcChatTransport : ChatTransport {
         }
     }
 
-    private fun extractRemotePeer(responseObserver: StreamObserver<ProtoChatMessage>): PeerInfo {
-        return try {
-            val scso = responseObserver as? ServerCallStreamObserver<ProtoChatMessage>
-                ?: return fallbackPeer()
-            val attrs = scso.attributes
-            val addr = attrs.get(Grpc.TRANSPORT_REMOTE_ADDR) as? InetSocketAddress
-                ?: return fallbackPeer()
-            val host = addr.hostString ?: addr.address?.hostAddress?.takeIf { it.isNotBlank() }
-                ?: "peer"
-            val port = addr.port.takeIf { it in 1..65535 } ?: 1
-            PeerInfo(host, port)
-        } catch (_: Exception) {
-            fallbackPeer()
-        }
-    }
-
-    private fun fallbackPeer(): PeerInfo = PeerInfo("peer", 1)
+    /** Fallback, если [PeerAddressInterceptor] не в цепочке или в [Context] нет адреса. */
+    private fun serverConnectedPeerPlaceholder(): PeerInfo = PeerInfo("peer", 1)
 }

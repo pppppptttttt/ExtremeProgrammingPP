@@ -2,6 +2,7 @@ package grpc.server
 
 import io.grpc.BindableService
 import io.grpc.Server
+import io.grpc.ServerInterceptor
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder
 import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
@@ -14,6 +15,7 @@ class ChatGrpcServer(
     private val bindHost: String,
     private val port: Int,
     private val service: BindableService = EchoChatService(),
+    private val interceptors: List<ServerInterceptor> = emptyList(),
 ) {
     private val logger = Logger.getLogger(ChatGrpcServer::class.java.name)
 
@@ -22,7 +24,9 @@ class ChatGrpcServer(
     fun start() {
         check(server == null) { "Server already started" }
         val socket = InetSocketAddress(bindHost, port)
-        val built = NettyServerBuilder.forAddress(socket)
+        val built = NettyServerBuilder.forAddress(socket).apply {
+            interceptors.forEach { intercept(it) }
+        }
             .addService(service)
             .build()
         built.start()
