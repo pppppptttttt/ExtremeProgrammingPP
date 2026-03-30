@@ -1,7 +1,7 @@
 package grpc.client
 
-import grpc.GrpcConstants
 import com.google.protobuf.Timestamp
+import grpc.GrpcConstants
 import io.grpc.stub.StreamObserver
 import org.hse.chat.v1.ChatMessage
 import java.time.Instant

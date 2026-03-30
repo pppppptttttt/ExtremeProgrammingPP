@@ -1,5 +1,8 @@
 package endtoend
 
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
+import org.junit.jupiter.api.Tag
 import java.io.File
 import java.net.ServerSocket
 import java.nio.charset.StandardCharsets
@@ -7,9 +10,6 @@ import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 import kotlin.test.Test
 import kotlin.test.assertTrue
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
-import org.junit.jupiter.api.Tag
 
 private const val E2E_TIMEOUT_OVERALL_MS = 120_000L
 private const val E2E_WAIT_LISTEN_MS = 45_000L
