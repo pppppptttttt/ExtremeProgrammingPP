@@ -19,9 +19,11 @@ class ChatGrpcClient(
 
     fun connect() {
         check(channel == null) { "Channel already open" }
-        val built = ManagedChannelBuilder.forAddress(host, port)
-            .usePlaintext()
-            .build()
+        val built =
+            ManagedChannelBuilder
+                .forAddress(host, port)
+                .usePlaintext()
+                .build()
         channel = built
         logger.info("gRPC channel created: $host:$port (plaintext)")
     }

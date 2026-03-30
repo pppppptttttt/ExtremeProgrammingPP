@@ -11,7 +11,6 @@ import org.hse.chat.v1.ChatServiceGrpc
 internal class ChatTransportGrpcService(
     private val transport: GrpcChatTransport,
 ) : ChatServiceGrpc.ChatServiceImplBase() {
-
     override fun chat(responseObserver: StreamObserver<ChatMessage>): StreamObserver<ChatMessage> {
         val accepted = transport.tryAttachServerOutgoing(responseObserver)
         if (!accepted) {
@@ -20,7 +19,9 @@ internal class ChatTransportGrpcService(
             )
             return object : StreamObserver<ChatMessage> {
                 override fun onNext(value: ChatMessage) {}
+
                 override fun onError(t: Throwable) {}
+
                 override fun onCompleted() {}
             }
         }

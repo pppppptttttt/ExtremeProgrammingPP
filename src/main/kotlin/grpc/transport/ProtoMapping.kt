@@ -7,7 +7,8 @@ import java.util.UUID
 import org.hse.chat.v1.ChatMessage as ProtoChatMessage
 
 internal fun Instant.toProtoTimestamp(): Timestamp =
-    Timestamp.newBuilder()
+    Timestamp
+        .newBuilder()
         .setSeconds(epochSecond)
         .setNanos(nano)
         .build()
@@ -27,8 +28,13 @@ internal fun ProtoChatMessage.toDomain(): ChatMessage =
         id = UUID.randomUUID().toString(),
     )
 
-internal fun buildProtoMessage(sender: String, text: String, sentAt: Instant): ProtoChatMessage =
-    ProtoChatMessage.newBuilder()
+internal fun buildProtoMessage(
+    sender: String,
+    text: String,
+    sentAt: Instant,
+): ProtoChatMessage =
+    ProtoChatMessage
+        .newBuilder()
         .setSender(sender)
         .setText(text)
         .setSentAt(sentAt.toProtoTimestamp())

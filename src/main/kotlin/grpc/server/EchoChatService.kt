@@ -8,9 +8,8 @@ import org.hse.chat.v1.ChatServiceGrpc
  * Заглушка: входящие [ChatMessage] из клиентского потока отражаются в ответный поток (эхо).
  */
 class EchoChatService : ChatServiceGrpc.ChatServiceImplBase() {
-
-    override fun chat(responseObserver: StreamObserver<ChatMessage>): StreamObserver<ChatMessage> {
-        return object : StreamObserver<ChatMessage> {
+    override fun chat(responseObserver: StreamObserver<ChatMessage>): StreamObserver<ChatMessage> =
+        object : StreamObserver<ChatMessage> {
             override fun onNext(value: ChatMessage) {
                 responseObserver.onNext(value)
             }
@@ -23,5 +22,4 @@ class EchoChatService : ChatServiceGrpc.ChatServiceImplBase() {
                 responseObserver.onCompleted()
             }
         }
-    }
 }

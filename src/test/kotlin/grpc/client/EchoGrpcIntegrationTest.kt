@@ -5,7 +5,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class EchoGrpcIntegrationTest {
-
     @Test
     fun echoRoundTrip() {
         val server = ChatGrpcServer("127.0.0.1", 0)

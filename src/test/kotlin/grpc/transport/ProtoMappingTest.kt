@@ -5,7 +5,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ProtoMappingTest {
-
     @Test
     fun roundTripInstant() {
         val instant = Instant.parse("2020-01-02T12:34:56.123Z")
