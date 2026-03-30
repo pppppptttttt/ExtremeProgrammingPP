@@ -2,7 +2,7 @@ package domain.model
 
 data class PeerInfo(
     val host: String,
-    val port: Int
+    val port: Int,
 ) {
     init {
         require(host.isNotBlank()) { "Host must not be blank" }

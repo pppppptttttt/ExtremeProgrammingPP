@@ -10,8 +10,9 @@ object CommandLineParser {
 
         val options = parseOptions(args)
 
-        val selfName = options["--name"]?.trim()
-            ?: throw IllegalArgumentException("Не указан --name\n\n${usage()}")
+        val selfName =
+            options["--name"]?.trim()
+                ?: throw IllegalArgumentException("Не указан --name\n\n${usage()}")
 
         require(selfName.isNotBlank()) { "Имя пользователя не должно быть пустым" }
 
@@ -23,33 +24,36 @@ object CommandLineParser {
             peerHost != null || peerPort != null -> {
                 if (peerHost == null || peerPort == null) {
                     throw IllegalArgumentException(
-                        "Для режима клиента нужны оба аргумента: --peer-host и --peer-port\n\n${usage()}"
+                        "Для режима клиента нужны оба аргумента: --peer-host и --peer-port\n\n${usage()}",
                     )
                 }
 
                 AppArgs(
                     selfName = selfName,
-                    mode = LaunchMode.Client(
-                        peer = PeerInfo(
-                            host = peerHost,
-                            port = parsePort(peerPort, "--peer-port")
-                        )
-                    )
+                    mode =
+                        LaunchMode.Client(
+                            peer =
+                                PeerInfo(
+                                    host = peerHost,
+                                    port = parsePort(peerPort, "--peer-port"),
+                                ),
+                        ),
                 )
             }
 
             listenPort != null -> {
                 AppArgs(
                     selfName = selfName,
-                    mode = LaunchMode.Server(
-                        listenPort = parsePort(listenPort, "--listen-port")
-                    )
+                    mode =
+                        LaunchMode.Server(
+                            listenPort = parsePort(listenPort, "--listen-port"),
+                        ),
                 )
             }
 
             else -> {
                 throw IllegalArgumentException(
-                    "Нужно указать либо --listen-port, либо пару --peer-host/--peer-port\n\n${usage()}"
+                    "Нужно указать либо --listen-port, либо пару --peer-host/--peer-port\n\n${usage()}",
                 )
             }
         }
@@ -64,8 +68,9 @@ object CommandLineParser {
         var i = 0
         while (i < args.size) {
             val key = args[i]
-            val value = args.getOrNull(i + 1)
-                ?: throw IllegalArgumentException("Для аргумента $key не передано значение")
+            val value =
+                args.getOrNull(i + 1)
+                    ?: throw IllegalArgumentException("Для аргумента $key не передано значение")
 
             require(key.startsWith("--")) { "Неожиданный аргумент: $key" }
             result[key] = value
@@ -74,9 +79,13 @@ object CommandLineParser {
         return result
     }
 
-    private fun parsePort(value: String, argName: String): Int {
-        val port = value.toIntOrNull()
-            ?: throw IllegalArgumentException("$argName должен быть числом")
+    private fun parsePort(
+        value: String,
+        argName: String,
+    ): Int {
+        val port =
+            value.toIntOrNull()
+                ?: throw IllegalArgumentException("$argName должен быть числом")
 
         require(port in 1..65535) {
             "$argName должен быть в диапазоне 1..65535"
@@ -85,7 +94,8 @@ object CommandLineParser {
         return port
     }
 
-    fun usage(): String = """
+    fun usage(): String =
+        """
         Использование:
           Сервер:
             --name <username> --listen-port <port>
@@ -96,5 +106,5 @@ object CommandLineParser {
         Примеры:
           --name Alice --listen-port 50051
           --name Bob --peer-host 127.0.0.1 --peer-port 50051
-    """.trimIndent()
+        """.trimIndent()
 }
