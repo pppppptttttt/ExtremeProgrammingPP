@@ -10,12 +10,13 @@ class ChatMessageTest {
     fun `stores explicit sentAt`() {
         val sentAt = Instant.parse("2026-03-30T12:34:56Z")
 
-        val message = ChatMessage(
-            sender = "Alice",
-            text = "hello",
-            sentAt = sentAt,
-            id = "msg-1"
-        )
+        val message =
+            ChatMessage(
+                sender = "Alice",
+                text = "hello",
+                sentAt = sentAt,
+                id = "msg-1",
+            )
 
         assertEquals("Alice", message.sender)
         assertEquals("hello", message.text)
@@ -29,7 +30,7 @@ class ChatMessageTest {
             ChatMessage(
                 sender = "Alice",
                 text = "   ",
-                sentAt = Instant.parse("2026-03-30T12:34:56Z")
+                sentAt = Instant.parse("2026-03-30T12:34:56Z"),
             )
         }
     }
