@@ -30,7 +30,6 @@ kotlin {
 }
 
 tasks.test {
-<<<<<<< HEAD
     useJUnitPlatform {
         excludeTags("e2e")
     }
@@ -40,7 +39,10 @@ tasks.register<Test>("e2eTest") {
     group = "verification"
     description = "E2E: два процесса installDist-бинарника (тег e2e). Зависит от installDist."
     dependsOn(tasks.installDist, tasks.named("testClasses"))
-    testClassesDirs = sourceSets.test.get().output.classesDirs
+    testClassesDirs =
+        sourceSets.test
+            .get()
+            .output.classesDirs
     classpath = sourceSets.test.get().runtimeClasspath
     useJUnitPlatform {
         includeTags("e2e")
@@ -48,14 +50,11 @@ tasks.register<Test>("e2eTest") {
     doFirst {
         val win = System.getProperty("os.name").lowercase().contains("windows")
         val scriptName = if (win) "ExtremeProgrammingPP.bat" else "ExtremeProgrammingPP"
-        val binary = layout.buildDirectory
-            .get()
-            .asFile
-            .resolve("install/ExtremeProgrammingPP/bin/$scriptName")
+        val binary =
+            layout.buildDirectory
+                .get()
+                .asFile
+                .resolve("install/ExtremeProgrammingPP/bin/$scriptName")
         systemProperty("e2e.binary", binary.absolutePath)
     }
 }
-=======
-    useJUnitPlatform()
-}
->>>>>>> 8cc034c (add ktlint)
