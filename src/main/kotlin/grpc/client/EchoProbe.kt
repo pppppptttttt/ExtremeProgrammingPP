@@ -1,6 +1,7 @@
 package grpc.client
 
 import com.google.protobuf.Timestamp
+import grpc.GrpcConstants
 import io.grpc.stub.StreamObserver
 import org.hse.chat.v1.ChatMessage
 import java.time.Instant
@@ -65,7 +66,7 @@ fun echoProbe(
     requestObserver.onNext(msg)
     requestObserver.onCompleted()
 
-    if (!latch.await(15, TimeUnit.SECONDS)) {
+    if (!latch.await(GrpcConstants.ECHO_PROBE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
         error("Echo probe timed out waiting for echo")
     }
     streamError?.let { throw it }

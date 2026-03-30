@@ -1,5 +1,6 @@
 package grpc.client
 
+import grpc.GrpcConstants
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
 import org.hse.chat.v1.ChatServiceGrpc
@@ -38,9 +39,9 @@ class ChatGrpcClient(
         logger.info("Shutting down gRPC channel to $host:$port")
         ch.shutdown()
         try {
-            if (!ch.awaitTermination(5, TimeUnit.SECONDS)) {
+            if (!ch.awaitTermination(GrpcConstants.SHUTDOWN_AWAIT_SECONDS, TimeUnit.SECONDS)) {
                 ch.shutdownNow()
-                if (!ch.awaitTermination(5, TimeUnit.SECONDS)) {
+                if (!ch.awaitTermination(GrpcConstants.SHUTDOWN_AWAIT_SECONDS, TimeUnit.SECONDS)) {
                     logger.warning("Channel did not terminate")
                 }
             }

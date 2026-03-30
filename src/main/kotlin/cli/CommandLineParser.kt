@@ -1,8 +1,14 @@
 package cli
 
+import domain.model.NetworkPorts
 import domain.model.PeerInfo
 
+/**
+ * Разбор аргументов командной строки в [AppArgs].
+ * Пары `--ключ значение`; пустой ввод или `--help` приводит к исключению с текстом [usage].
+ */
 object CommandLineParser {
+    /** Парсит [args] или бросает [IllegalArgumentException] с подсказкой. */
     fun parse(args: Array<String>): AppArgs {
         if (args.isEmpty() || args.contains("--help")) {
             throw IllegalArgumentException(usage())
@@ -16,16 +22,21 @@ object CommandLineParser {
 
         require(selfName.isNotBlank()) { "Имя пользователя не должно быть пустым" }
 
+        return resolveLaunchMode(selfName, options)
+    }
+
+    private fun resolveLaunchMode(
+        selfName: String,
+        options: Map<String, String>,
+    ): AppArgs {
         val listenPort = options["--listen-port"]
         val peerHost = options["--peer-host"]
         val peerPort = options["--peer-port"]
 
         return when {
             peerHost != null || peerPort != null -> {
-                if (peerHost == null || peerPort == null) {
-                    throw IllegalArgumentException(
-                        "Для режима клиента нужны оба аргумента: --peer-host и --peer-port\n\n${usage()}",
-                    )
+                require(peerHost != null && peerPort != null) {
+                    "Для режима клиента нужны оба аргумента: --peer-host и --peer-port\n\n${usage()}"
                 }
 
                 AppArgs(
@@ -87,13 +98,14 @@ object CommandLineParser {
             value.toIntOrNull()
                 ?: throw IllegalArgumentException("$argName должен быть числом")
 
-        require(port in 1..65535) {
-            "$argName должен быть в диапазоне 1..65535"
+        require(port in NetworkPorts.MIN_TCP_PORT..NetworkPorts.MAX_TCP_PORT) {
+            "$argName должен быть в диапазоне ${NetworkPorts.MIN_TCP_PORT}..${NetworkPorts.MAX_TCP_PORT}"
         }
 
         return port
     }
 
+    /** Краткая справка по флагам для вывода в консоль или в сообщении об ошибке. */
     fun usage(): String =
         """
         Использование:

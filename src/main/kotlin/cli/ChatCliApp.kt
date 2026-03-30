@@ -11,11 +11,16 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/**
+ * Консольное приложение чата: подписка на [ChatTransport.events], запуск сервера или клиента,
+ * цикл ввода и отправка [SendMessageCommand].
+ */
 class ChatCliApp(
     private val transport: ChatTransport,
     private val renderer: ConsoleRenderer = ConsoleRenderer(),
     private val readLineFn: () -> String? = ::readLine,
 ) {
+    /** Запуск сценария по [args]: транспорт, приветствие, чтение stdin до `/exit` или EOF. */
     suspend fun run(args: AppArgs) =
         coroutineScope {
             val eventJob =
@@ -47,7 +52,7 @@ class ChatCliApp(
                 }
 
                 renderer.printWelcome(args)
-                inputLoop(args.selfName)
+                runInputLoop(args.selfName)
             } finally {
                 try {
                     transport.disconnect()
@@ -58,35 +63,55 @@ class ChatCliApp(
             }
         }
 
-    private suspend fun inputLoop(selfName: String) =
+    private suspend fun runInputLoop(selfName: String) =
         withContext(Dispatchers.IO) {
             while (currentCoroutineContext().isActive) {
-                val line = readLineFn() ?: break
-                val trimmed = line.trim()
-
-                if (trimmed.isEmpty()) {
-                    renderer.printPrompt()
-                    continue
-                }
-
-                when (trimmed) {
-                    "/help" -> renderer.printHelp()
-                    "/exit" -> return@withContext
-                    else -> {
-                        try {
-                            val sentMessage =
-                                transport.send(
-                                    SendMessageCommand(
-                                        sender = selfName,
-                                        text = trimmed,
-                                    ),
-                                )
-                            renderer.printOwnMessage(sentMessage)
-                        } catch (t: Throwable) {
-                            renderer.printError(t)
-                        }
+                val line = readLineFn()
+                val keepGoing =
+                    when {
+                        line == null -> false
+                        else -> handleInputLine(selfName, line.trim())
                     }
-                }
+                if (!keepGoing) break
             }
         }
+
+    private suspend fun handleInputLine(
+        selfName: String,
+        trimmed: String,
+    ): Boolean =
+        when {
+            trimmed.isEmpty() -> {
+                renderer.printPrompt()
+                true
+            }
+            trimmed == "/exit" -> false
+            trimmed == "/help" -> {
+                renderer.printHelp()
+                true
+            }
+            else -> {
+                sendUserMessage(selfName, trimmed)
+                true
+            }
+        }
+
+    @Suppress("TooGenericExceptionCaught")
+    private suspend fun sendUserMessage(
+        selfName: String,
+        text: String,
+    ) {
+        try {
+            val sentMessage =
+                transport.send(
+                    SendMessageCommand(
+                        sender = selfName,
+                        text = text,
+                    ),
+                )
+            renderer.printOwnMessage(sentMessage)
+        } catch (e: Exception) {
+            renderer.printError(e)
+        }
+    }
 }

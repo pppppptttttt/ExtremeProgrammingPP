@@ -20,20 +20,31 @@
 
 ```text
 ExtremeProgrammingPP/
-├── .github/workflows/ci.yml
-├── chat-api/                     # protobuf/gRPC контракт
-├── docs/                         # архитектура и требования
+├── .github/
+│   ├── workflows/          # CI, CodeQL, релизы по тегам v*
+│   └── dependabot.yml      # обновления Gradle и GitHub Actions
+├── chat-api/               # protobuf / gRPC контракт
+├── docs/                   # требования, архитектура, план тестов, декомпозиция
 ├── src/main/kotlin/
 │   ├── cli/
 │   ├── domain/
 │   ├── grpc/
 │   └── Main.kt
-├── src/test/kotlin/
+├── src/test/kotlin/        # unit, integration, endtoend (тег e2e)
 ├── build.gradle.kts
 ├── settings.gradle.kts
 ├── gradlew
 └── gradlew.bat
 ```
+
+## Как устроено
+
+- **`cli`** — разбор аргументов, консольный ввод-вывод;
+- **`domain`** — модель сообщений, команды, порт [`ChatTransport`](src/main/kotlin/domain/port/ChatTransport.kt);
+- **`grpc`** — реализация транспорта поверх gRPC;
+- **`chat-api`** — protobuf-контракт и codegen для провода между процессами;
+- подробности, диаграммы и обоснование решений — в **`docs/Архитектура.md`**;
+- кто за что отвечал в паре — в **`docs/Декомпозиция задач.md`**.
 
 ## Требования к окружению
 
@@ -58,6 +69,8 @@ ExtremeProgrammingPP/
 
 ## Запуск тестов
 
+Юнит- и интеграционные тесты (без сценариев с тегом `e2e`):
+
 ### Linux
 
 ```bash
@@ -69,6 +82,34 @@ ExtremeProgrammingPP/
 ```powershell
 .\gradlew.bat test
 ```
+
+## E2E-тесты
+
+Два процесса собранного дистрибутива (`installDist`), обмен строкой в консоли. Класс: `endtoend.CliTwoProcessE2ETest`, тег JUnit **`e2e`**.
+
+### Linux
+
+```bash
+./gradlew e2eTest
+```
+
+### Windows
+
+```powershell
+.\gradlew.bat e2eTest
+```
+
+Задача сама собирает бинарь и передаёт путь через системное свойство `e2e.binary`.
+
+## Линтер и статический анализ
+
+| Задача Gradle | Назначение |
+|---------------|------------|
+| `./gradlew ktlintCheck` | проверка стиля Kotlin (ktlint) |
+| `./gradlew ktlintFormat` | автоформатирование под ktlint |
+| `./gradlew detekt` | статический анализ (Detekt) |
+
+Те же проверки выполняются в **CI** перед сборкой (см. `.github/workflows/ci.yml`).
 
 ## Проверка запуска приложения
 
@@ -141,16 +182,18 @@ ExtremeProgrammingPP/
 
 ## Документация
 
-Дополнительные документы находятся в каталоге `docs/`:
+Дополнительные документы в каталоге `docs/`:
 
-* `docs/Архитектура.md` — описание архитектуры проекта;
-* `docs/Требования.md` — формализованные требования к системе.
+* [`docs/Архитектура.md`](docs/Архитектура.md) — уровни, диаграммы, ключевые решения;
+* [`docs/Требования.md`](docs/Требования.md) — формализованные требования к системе;
+* [`docs/testPlan.md`](docs/testPlan.md) — план тестирования и чеклист автотестов;
+* [Декомпозиция задач](docs/Декомпозиция%20задач.md) — распределение зон ответственности между участниками команды.
 
 ## Используемые технологии
 
-* **Kotlin/JVM**
-* **gRPC**
-* **Protocol Buffers**
-* **Gradle**
-* **JUnit / Kotlin test**
-* **GitHub Actions**
+* **Kotlin/JVM**, **Gradle**
+* **gRPC**, **Protocol Buffers**
+* **JUnit / Kotlin test**,
+* **ktlint**, **Detekt**
+* **GitHub Actions** (сборка, тесты, ktlint, Detekt, E2E, отдельно **CodeQL**, релизы по тегам `v*`)
+* **Dependabot** (обновления зависимостей)

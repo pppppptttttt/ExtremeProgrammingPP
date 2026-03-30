@@ -1,7 +1,8 @@
 package domain.command
 
+/** Команда отправки исходящего сообщения от [sender]. */
 data class SendMessageCommand(
-    val sender: String, // username
+    val sender: String,
     val text: String,
 ) {
     init {

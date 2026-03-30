@@ -1,4 +1,4 @@
-package e2e
+package endtoend
 
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -6,9 +6,20 @@ import org.junit.jupiter.api.Tag
 import java.io.File
 import java.net.ServerSocket
 import java.nio.charset.StandardCharsets
+import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 import kotlin.test.Test
 import kotlin.test.assertTrue
+
+private const val E2E_TIMEOUT_OVERALL_MS = 120_000L
+private const val E2E_WAIT_LISTEN_MS = 45_000L
+private const val E2E_WAIT_CLIENT_START_MS = 30_000L
+private const val E2E_WAIT_MESSAGE_MS = 20_000L
+private const val E2E_PROCESS_WAIT_SEC = 30L
+private const val E2E_DESTROY_WAIT_SEC = 10L
+private const val E2E_DESTROY_KILL_SEC = 5L
+private const val E2E_POLL_DRAIN_MS = 150L
+private const val E2E_READ_BUFFER_SIZE = 1024
 
 /**
  * Два процесса **installDist**-бинарника (без вложенного Gradle).
@@ -19,7 +30,7 @@ class CliTwoProcessE2ETest {
     @Test
     fun serverAndClientExchangeOneMessage() {
         runBlocking {
-            withTimeout(120_000) {
+            withTimeout(E2E_TIMEOUT_OVERALL_MS) {
                 val port = ServerSocket(0).use { it.localPort }
                 val projectDir = File(System.getProperty("user.dir"))
                 val binary = resolveAppBinary()
@@ -42,7 +53,7 @@ class CliTwoProcessE2ETest {
 
                 try {
                     assertTrue(
-                        waitForSubstring(serverLog, "listen on port $port", 45_000),
+                        waitForSubstring(serverLog, "listen on port $port", E2E_WAIT_LISTEN_MS),
                         "server did not start; output:\n${serverLogSnapshot(serverLog)}",
                     )
 
@@ -64,34 +75,10 @@ class CliTwoProcessE2ETest {
 
                     try {
                         assertTrue(
-                            waitForSubstring(clientLog, "P2P chat started", 30_000),
+                            waitForSubstring(clientLog, "P2P chat started", E2E_WAIT_CLIENT_START_MS),
                             "client did not start; output:\n${clientLogSnapshot(clientLog)}",
                         )
-
-                        clientProcess.outputStream.writer(StandardCharsets.UTF_8).buffered().apply {
-                            write("e2e-ping\n")
-                            flush()
-                        }
-
-                        assertTrue(
-                            waitForSubstring(serverLog, "E2ECli", 20_000) &&
-                                waitForSubstring(serverLog, "e2e-ping", 20_000),
-                            "server did not show client message; server:\n${serverLogSnapshot(serverLog)}",
-                        )
-
-                        clientProcess.outputStream.writer(StandardCharsets.UTF_8).buffered().apply {
-                            write("/exit\n")
-                            flush()
-                        }
-
-                        clientProcess.waitFor(30, java.util.concurrent.TimeUnit.SECONDS)
-
-                        serverProcess.outputStream.writer(StandardCharsets.UTF_8).buffered().apply {
-                            write("/exit\n")
-                            flush()
-                        }
-
-                        serverProcess.waitFor(30, java.util.concurrent.TimeUnit.SECONDS)
+                        exchangePingAndExit(clientProcess, serverProcess, serverLog)
                     } finally {
                         clientReader.interrupt()
                         destroyProcess(clientProcess)
@@ -102,6 +89,35 @@ class CliTwoProcessE2ETest {
                 }
             }
         }
+    }
+
+    private fun exchangePingAndExit(
+        clientProcess: Process,
+        serverProcess: Process,
+        serverLog: StringBuilder,
+    ) {
+        clientProcess.outputStream.writer(StandardCharsets.UTF_8).buffered().apply {
+            write("e2e-ping\n")
+            flush()
+        }
+
+        assertTrue(
+            waitForSubstring(serverLog, "E2ECli", E2E_WAIT_MESSAGE_MS) &&
+                waitForSubstring(serverLog, "e2e-ping", E2E_WAIT_MESSAGE_MS),
+            "server did not show client message; server:\n${serverLogSnapshot(serverLog)}",
+        )
+
+        clientProcess.outputStream.writer(StandardCharsets.UTF_8).buffered().apply {
+            write("/exit\n")
+            flush()
+        }
+        clientProcess.waitFor(E2E_PROCESS_WAIT_SEC, TimeUnit.SECONDS)
+
+        serverProcess.outputStream.writer(StandardCharsets.UTF_8).buffered().apply {
+            write("/exit\n")
+            flush()
+        }
+        serverProcess.waitFor(E2E_PROCESS_WAIT_SEC, TimeUnit.SECONDS)
     }
 
     private fun resolveAppBinary(): File {
@@ -131,10 +147,10 @@ class CliTwoProcessE2ETest {
         process: Process,
         sink: StringBuilder,
     ): Thread =
-        thread(name = "e2e-drain-${System.identityHashCode(process)}") {
+        thread(name = "endtoend-drain-${System.identityHashCode(process)}") {
             try {
                 process.inputStream.bufferedReader(StandardCharsets.UTF_8).use { reader ->
-                    val buf = CharArray(1024)
+                    val buf = CharArray(E2E_READ_BUFFER_SIZE)
                     while (true) {
                         val n = reader.read(buf)
                         if (n == -1) break
@@ -156,7 +172,7 @@ class CliTwoProcessE2ETest {
             synchronized(sink) {
                 if (sink.contains(needle)) return true
             }
-            Thread.sleep(150)
+            Thread.sleep(E2E_POLL_DRAIN_MS)
         }
         return false
     }
@@ -168,9 +184,9 @@ class CliTwoProcessE2ETest {
     private fun destroyProcess(p: Process) {
         if (!p.isAlive) return
         p.destroy()
-        if (!p.waitFor(10, java.util.concurrent.TimeUnit.SECONDS)) {
+        if (!p.waitFor(E2E_DESTROY_WAIT_SEC, TimeUnit.SECONDS)) {
             p.destroyForcibly()
-            p.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)
+            p.waitFor(E2E_DESTROY_KILL_SEC, TimeUnit.SECONDS)
         }
     }
 }

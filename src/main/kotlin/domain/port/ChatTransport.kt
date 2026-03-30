@@ -7,6 +7,10 @@ import domain.model.ChatEvent
 import domain.model.ChatMessage
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * Порт прикладного уровня для сетевого обмена чата: события, серверный режим, клиент, отправка сообщений.
+ * Реализация изолирует gRPC и protobuf от CLI и домена.
+ */
 interface ChatTransport : AutoCloseable {
     /**
      * Поток входящих событий: подключение, отключение, входящие сообщения, системные ошибки.

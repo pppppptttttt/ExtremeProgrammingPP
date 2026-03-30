@@ -7,6 +7,7 @@ import java.io.PrintStream
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+/** Вывод приветствия, сообщений, событий транспорта и ошибок в консоль (с учётом [zoneId]). */
 class ConsoleRenderer(
     zoneId: ZoneId = ZoneId.systemDefault(),
     private val out: PrintStream = System.out,
@@ -15,6 +16,7 @@ class ConsoleRenderer(
     private val formatter: DateTimeFormatter =
         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss XXX").withZone(zoneId)
 
+    /** Стартовый баннер: пользователь, режим, подсказка по командам и приглашение ввода. */
     @Synchronized
     fun printWelcome(args: AppArgs) {
         out.println("P2P chat started")
@@ -32,6 +34,7 @@ class ConsoleRenderer(
         printPrompt()
     }
 
+    /** Текст справки по встроенным командам чата. */
     @Synchronized
     fun printHelp() {
         out.println("/help - показать команды")
@@ -39,12 +42,14 @@ class ConsoleRenderer(
         printPrompt()
     }
 
+    /** Подтверждение отправки собственного сообщения (эхо в консоль). */
     @Synchronized
     fun printOwnMessage(message: ChatMessage) {
         printMessageLine(message)
         printPrompt()
     }
 
+    /** Отображение события из [ChatEvent] (входящее сообщение, connect/disconnect, ошибка). */
     @Synchronized
     fun printEvent(event: ChatEvent) {
         when (event) {
@@ -73,18 +78,21 @@ class ConsoleRenderer(
         printPrompt()
     }
 
+    /** Сообщение об ошибке в stderr с приглашением ввода. */
     @Synchronized
     fun printError(message: String) {
         err.println("[error] $message")
         printPrompt()
     }
 
+    /** Краткий вывод исключения в stderr. */
     @Synchronized
     fun printError(error: Throwable) {
         err.println("[error] ${error.message ?: error::class.simpleName.orEmpty()}")
         printPrompt()
     }
 
+    /** Приглашение строки ввода `> `. */
     @Synchronized
     fun printPrompt() {
         out.print("> ")

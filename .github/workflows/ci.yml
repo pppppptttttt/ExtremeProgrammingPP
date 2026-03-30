@@ -45,6 +45,10 @@ jobs:
         if: runner.os != 'Windows'
         run: ./gradlew --no-daemon ktlintCheck
 
+      - name: Detekt (Linux)
+        if: runner.os != 'Windows'
+        run: ./gradlew --no-daemon detekt
+
       - name: Assemble project (Linux)
         if: runner.os != 'Windows'
         run: ./gradlew --no-daemon assemble
@@ -64,6 +68,10 @@ jobs:
       - name: Ktlint check (Windows)
         if: runner.os == 'Windows'
         run: .\gradlew.bat --no-daemon ktlintCheck
+
+      - name: Detekt (Windows)
+        if: runner.os == 'Windows'
+        run: .\gradlew.bat --no-daemon detekt
 
       - name: Assemble project (Windows)
         if: runner.os == 'Windows'
