@@ -1,5 +1,6 @@
 package grpc.server
 
+import grpc.GrpcConstants
 import io.grpc.BindableService
 import io.grpc.Server
 import io.grpc.ServerInterceptor
@@ -53,9 +54,9 @@ class ChatGrpcServer(
         logger.info("gRPC server shutting down")
         s.shutdown()
         try {
-            if (!s.awaitTermination(5, TimeUnit.SECONDS)) {
+            if (!s.awaitTermination(GrpcConstants.SHUTDOWN_AWAIT_SECONDS, TimeUnit.SECONDS)) {
                 s.shutdownNow()
-                if (!s.awaitTermination(5, TimeUnit.SECONDS)) {
+                if (!s.awaitTermination(GrpcConstants.SHUTDOWN_AWAIT_SECONDS, TimeUnit.SECONDS)) {
                     logger.warning("gRPC server did not terminate")
                 }
             }

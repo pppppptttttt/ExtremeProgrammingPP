@@ -1,5 +1,6 @@
 package grpc.interceptor
 
+import domain.model.NetworkPorts
 import domain.model.PeerInfo
 import io.grpc.Attributes
 import io.grpc.Context
@@ -32,10 +33,12 @@ class PeerAddressInterceptor : ServerInterceptor {
 
     private fun peerFrom(addr: InetSocketAddress?): PeerInfo {
         if (addr == null) {
-            return PeerInfo("peer", 1)
+            return PeerInfo("peer", NetworkPorts.MIN_TCP_PORT)
         }
         val host = addr.hostString ?: addr.address?.hostAddress?.takeIf { it.isNotBlank() } ?: "peer"
-        val port = addr.port.takeIf { it in 1..65535 } ?: 1
+        val port =
+            addr.port.takeIf { it in NetworkPorts.MIN_TCP_PORT..NetworkPorts.MAX_TCP_PORT }
+                ?: NetworkPorts.MIN_TCP_PORT
         return PeerInfo(host, port)
     }
 }

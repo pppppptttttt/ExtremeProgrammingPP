@@ -7,6 +7,7 @@ import domain.model.ChatEvent
 import domain.model.ChatMessage
 import domain.model.PeerInfo
 import domain.port.ChatTransport
+import grpc.GrpcConstants
 import grpc.interceptor.GrpcPeerContext
 import grpc.interceptor.PeerAddressInterceptor
 import grpc.server.ChatGrpcServer
@@ -35,6 +36,7 @@ import org.hse.chat.v1.ChatMessage as ProtoChatMessage
 /**
  * Адаптер [ChatTransport] поверх gRPC bidirectional streaming.
  */
+@Suppress("TooManyFunctions")
 class GrpcChatTransport : ChatTransport {
     private enum class Mode { IDLE, SERVER, CLIENT }
 
@@ -135,7 +137,7 @@ class GrpcChatTransport : ChatTransport {
         withContext(Dispatchers.IO) {
             val out =
                 synchronized(lock) { outgoing }
-                    ?: throw IllegalStateException("Нет активного соединения (дождитесь подключения peer)")
+                    ?: error("Нет активного соединения (дождитесь подключения peer)")
             val instant = Instant.now()
             val proto = buildProtoMessage(command.sender, command.text, instant)
             out.onNext(proto)
@@ -165,7 +167,7 @@ class GrpcChatTransport : ChatTransport {
                 val ch = managedChannel
                 managedChannel = null
                 ch?.shutdown()
-                ch?.awaitTermination(5, TimeUnit.SECONDS)
+                ch?.awaitTermination(GrpcConstants.SHUTDOWN_AWAIT_SECONDS, TimeUnit.SECONDS)
                 mode = Mode.IDLE
             }
             peer?.let { p ->

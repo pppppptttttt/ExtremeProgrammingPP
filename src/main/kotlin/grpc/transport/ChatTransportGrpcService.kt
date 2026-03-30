@@ -18,11 +18,11 @@ internal class ChatTransportGrpcService(
                 Status.RESOURCE_EXHAUSTED.withDescription("Only one peer at a time").asRuntimeException(),
             )
             return object : StreamObserver<ChatMessage> {
-                override fun onNext(value: ChatMessage) {}
+                override fun onNext(value: ChatMessage) = Unit
 
-                override fun onError(t: Throwable) {}
+                override fun onError(t: Throwable) = Unit
 
-                override fun onCompleted() {}
+                override fun onCompleted() = Unit
             }
         }
         return object : StreamObserver<ChatMessage> {

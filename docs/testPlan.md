@@ -55,7 +55,7 @@
 
 | Требование (суть) | Как проверяется |
 |---------------------|-----------------|
-| P2P, два участника, прямое соединение | `GrpcChatTransportIntegrationTest`, E2E `CliTwoProcessE2ETest` |
+| P2P, два участника, прямое соединение | `GrpcChatTransportIntegrationTest`, E2E `endtoend.CliTwoProcessE2ETest` |
 | Режим сервера / клиента по аргументам | `CommandLineParserTest`, `ChatCliAppTest`, E2E |
 | Имя, дата/время, текст в сообщении | `ConsoleRendererTest`, `ProtoMappingTest`, интеграция транспорта |
 | Консольный ввод-вывод, команды `/help`, `/exit` | `ChatCliAppTest`, `ConsoleRendererTest` |
@@ -72,7 +72,7 @@
 | Задача | Содержание |
 |--------|------------|
 | `test` | Юнит + интеграционные тесты; тег **`e2e` исключён** |
-| `e2eTest` | Зависит от **`installDist`**, только тег **`e2e`** (`e2e.CliTwoProcessE2ETest`), свойство `e2e.binary` |
+| `e2eTest` | Зависит от **`installDist`**, только тег **`e2e`** (`endtoend.CliTwoProcessE2ETest`), свойство `e2e.binary` |
 | CI | `assemble` → `test` → `e2eTest` → `run --args="--help"` (Linux и Windows) |
 
 Стек: **Kotlin Test**, **JUnit Platform**.
@@ -85,7 +85,7 @@
 | CLI | `CommandLineParserTest`, `ConsoleRendererTest`, `ChatCliAppTest` | Парсинг, вывод, сценарии с фейковым транспортом |
 | gRPC | `ProtoMappingTest`, `EchoGrpcIntegrationTest` | Маппинг, эхо по контракту |
 | Транспорт | `GrpcChatTransportIntegrationTest`, `GrpcChatTransportNegativeTest` | Дуплекс; отказ второго клиента; disconnect |
-| E2E | `e2e.CliTwoProcessE2ETest` | Два процесса бинарника, обмен строкой |
+| E2E | `endtoend.CliTwoProcessE2ETest` | Два процесса бинарника, обмен строкой |
 
 Модуль `:chat-api` отдельных тестов не содержит (только генерируемый код и контракт).
 

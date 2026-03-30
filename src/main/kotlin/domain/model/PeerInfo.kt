@@ -7,7 +7,9 @@ data class PeerInfo(
 ) {
     init {
         require(host.isNotBlank()) { "Host must not be blank" }
-        require(port in 1..65535) { "Port must be in range 1..65535" }
+        require(port in NetworkPorts.MIN_TCP_PORT..NetworkPorts.MAX_TCP_PORT) {
+            "Port must be in range ${NetworkPorts.MIN_TCP_PORT}..${NetworkPorts.MAX_TCP_PORT}"
+        }
     }
 
     override fun toString(): String = "$host:$port"
