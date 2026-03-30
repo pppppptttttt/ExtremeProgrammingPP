@@ -1,6 +1,7 @@
 import cli.ChatCliApp
 import cli.CommandLineParser
 import domain.port.ChatTransport
+import grpc.transport.GrpcChatTransport
 import kotlinx.coroutines.runBlocking
 
 fun main(args: Array<String>) = runBlocking {
@@ -15,10 +16,5 @@ fun main(args: Array<String>) = runBlocking {
     ChatCliApp(transport).run(parsedArgs)
 }
 
-/**
- * Здесь должен появиться адаптер транспортного слоя.
- * Его реализует часть проекта с gRPC.
- */
-private fun createTransport(): ChatTransport {
-    error("ChatTransport implementation is not wired yet")
-}
+/** gRPC-реализация [ChatTransport] — см. [GrpcChatTransport]. */
+private fun createTransport(): ChatTransport = GrpcChatTransport()
