@@ -1,14 +1,14 @@
 package e2e
 
-import java.io.File
-import java.nio.charset.StandardCharsets
-import java.net.ServerSocket
-import kotlin.concurrent.thread
-import kotlin.test.Test
-import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.jupiter.api.Tag
+import java.io.File
+import java.net.ServerSocket
+import java.nio.charset.StandardCharsets
+import kotlin.concurrent.thread
+import kotlin.test.Test
+import kotlin.test.assertTrue
 
 /**
  * Два процесса **installDist**-бинарника (без вложенного Gradle).
@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Tag
  */
 @Tag("e2e")
 class CliTwoProcessE2ETest {
-
     @Test
     fun serverAndClientExchangeOneMessage() {
         runBlocking {
@@ -33,11 +32,12 @@ class CliTwoProcessE2ETest {
                 val serverLog = StringBuilder()
                 val clientLog = StringBuilder()
 
-                val serverProcess = startApp(
-                    binary = binary,
-                    workingDir = projectDir,
-                    args = listOf("--name", "E2ESrv", "--listen-port", "$port"),
-                )
+                val serverProcess =
+                    startApp(
+                        binary = binary,
+                        workingDir = projectDir,
+                        args = listOf("--name", "E2ESrv", "--listen-port", "$port"),
+                    )
                 val serverReader = drainUtf8(serverProcess, serverLog)
 
                 try {
@@ -46,18 +46,20 @@ class CliTwoProcessE2ETest {
                         "server did not start; output:\n${serverLogSnapshot(serverLog)}",
                     )
 
-                    val clientProcess = startApp(
-                        binary = binary,
-                        workingDir = projectDir,
-                        args = listOf(
-                            "--name",
-                            "E2ECli",
-                            "--peer-host",
-                            "127.0.0.1",
-                            "--peer-port",
-                            "$port",
-                        ),
-                    )
+                    val clientProcess =
+                        startApp(
+                            binary = binary,
+                            workingDir = projectDir,
+                            args =
+                                listOf(
+                                    "--name",
+                                    "E2ECli",
+                                    "--peer-host",
+                                    "127.0.0.1",
+                                    "--peer-port",
+                                    "$port",
+                                ),
+                        )
                     val clientReader = drainUtf8(clientProcess, clientLog)
 
                     try {
@@ -110,7 +112,11 @@ class CliTwoProcessE2ETest {
         return File(projectDir, "build/install/ExtremeProgrammingPP/bin/$name")
     }
 
-    private fun startApp(binary: File, workingDir: File, args: List<String>): Process {
+    private fun startApp(
+        binary: File,
+        workingDir: File,
+        args: List<String>,
+    ): Process {
         val cmd = ArrayList<String>(args.size + 1)
         cmd.add(binary.absolutePath)
         cmd.addAll(args)
@@ -121,7 +127,10 @@ class CliTwoProcessE2ETest {
         return pb.start()
     }
 
-    private fun drainUtf8(process: Process, sink: StringBuilder): Thread =
+    private fun drainUtf8(
+        process: Process,
+        sink: StringBuilder,
+    ): Thread =
         thread(name = "e2e-drain-${System.identityHashCode(process)}") {
             try {
                 process.inputStream.bufferedReader(StandardCharsets.UTF_8).use { reader ->
@@ -137,7 +146,11 @@ class CliTwoProcessE2ETest {
             }
         }
 
-    private fun waitForSubstring(sink: StringBuilder, needle: String, timeoutMs: Long): Boolean {
+    private fun waitForSubstring(
+        sink: StringBuilder,
+        needle: String,
+        timeoutMs: Long,
+    ): Boolean {
         val end = System.currentTimeMillis() + timeoutMs
         while (System.currentTimeMillis() < end) {
             synchronized(sink) {
