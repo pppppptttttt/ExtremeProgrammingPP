@@ -43,5 +43,5 @@ bin/
 ### VS Code ###
 .vscode/
 
-### Mac OS ###
+### Desktop metadata ###
 .DS_Store
