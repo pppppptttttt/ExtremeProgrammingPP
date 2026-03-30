@@ -9,7 +9,12 @@ repositories {
     mavenCentral()
 }
 
+val grpcVersion = "1.68.2"
+
 dependencies {
+    implementation(project(":chat-api"))
+    implementation("io.grpc:grpc-netty-shaded:$grpcVersion")
+
     testImplementation(kotlin("test"))
 }
 
