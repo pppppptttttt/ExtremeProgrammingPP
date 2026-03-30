@@ -11,11 +11,16 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/**
+ * Консольное приложение чата: подписка на [ChatTransport.events], запуск сервера или клиента,
+ * цикл ввода и отправка [SendMessageCommand].
+ */
 class ChatCliApp(
     private val transport: ChatTransport,
     private val renderer: ConsoleRenderer = ConsoleRenderer(),
     private val readLineFn: () -> String? = ::readLine,
 ) {
+    /** Запуск сценария по [args]: транспорт, приветствие, чтение stdin до `/exit` или EOF. */
     suspend fun run(args: AppArgs) =
         coroutineScope {
             val eventJob =

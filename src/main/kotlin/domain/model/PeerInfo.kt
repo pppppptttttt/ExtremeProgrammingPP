@@ -1,5 +1,6 @@
 package domain.model
 
+/** Сетевой адрес удалённого peer: хост и порт TCP. */
 data class PeerInfo(
     val host: String,
     val port: Int,

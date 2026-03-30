@@ -1,5 +1,6 @@
 package domain.command
 
+/** Команда запуска в режиме ожидания входящего подключения на [port]. */
 data class StartServerCommand(
     val selfName: String,
     val port: Int,

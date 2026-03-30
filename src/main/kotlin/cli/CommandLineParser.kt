@@ -2,7 +2,12 @@ package cli
 
 import domain.model.PeerInfo
 
+/**
+ * Разбор аргументов командной строки в [AppArgs].
+ * Пары `--ключ значение`; пустой ввод или `--help` приводит к исключению с текстом [usage].
+ */
 object CommandLineParser {
+    /** Парсит [args] или бросает [IllegalArgumentException] с подсказкой. */
     fun parse(args: Array<String>): AppArgs {
         if (args.isEmpty() || args.contains("--help")) {
             throw IllegalArgumentException(usage())
@@ -94,6 +99,7 @@ object CommandLineParser {
         return port
     }
 
+    /** Краткая справка по флагам для вывода в консоль или в сообщении об ошибке. */
     fun usage(): String =
         """
         Использование:
