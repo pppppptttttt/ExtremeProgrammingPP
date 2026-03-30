@@ -23,8 +23,8 @@ class ConsoleRendererTest {
                 sender = "Alice",
                 text = "hello",
                 sentAt = Instant.parse("2026-03-30T12:00:00Z"),
-                id = "msg-1"
-            )
+                id = "msg-1",
+            ),
         )
 
         val printed = out.utf8()
@@ -44,9 +44,9 @@ class ConsoleRendererTest {
                     sender = "Bob",
                     text = "hi",
                     sentAt = Instant.parse("2026-03-30T13:15:00Z"),
-                    id = "msg-2"
-                )
-            )
+                    id = "msg-2",
+                ),
+            ),
         )
 
         val printed = out.utf8()
@@ -73,8 +73,8 @@ class ConsoleRendererTest {
         renderer.printEvent(
             ChatEvent.Error(
                 text = "transport failed",
-                cause = IllegalStateException("boom")
-            )
+                cause = IllegalStateException("boom"),
+            ),
         )
 
         val printedErr = err.utf8()
@@ -91,8 +91,8 @@ class ConsoleRendererTest {
         renderer.printWelcome(
             AppArgs(
                 selfName = "Alice",
-                mode = LaunchMode.Server(50051)
-            )
+                mode = LaunchMode.Server(50051),
+            ),
         )
 
         val printed = out.utf8()
@@ -105,14 +105,12 @@ class ConsoleRendererTest {
     private fun newRenderer(
         out: ByteArrayOutputStream,
         err: ByteArrayOutputStream,
-    ): ConsoleRenderer {
-        return ConsoleRenderer(
+    ): ConsoleRenderer =
+        ConsoleRenderer(
             zoneId = ZoneId.of("UTC"),
             out = PrintStream(out, true, StandardCharsets.UTF_8),
             err = PrintStream(err, true, StandardCharsets.UTF_8),
         )
-    }
 
-    private fun ByteArrayOutputStream.utf8(): String =
-        String(this.toByteArray(), StandardCharsets.UTF_8)
+    private fun ByteArrayOutputStream.utf8(): String = String(this.toByteArray(), StandardCharsets.UTF_8)
 }

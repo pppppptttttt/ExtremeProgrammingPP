@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 jobs:
-  build-test-and-smoke-run:
+  build-test-and-lint:
     strategy:
       fail-fast: false
       matrix:
@@ -41,11 +41,15 @@ jobs:
         if: runner.os != 'Windows'
         run: chmod +x ./gradlew
 
+      - name: Ktlint check (Linux)
+        if: runner.os != 'Windows'
+        run: ./gradlew --no-daemon ktlintCheck
+
       - name: Assemble project (Linux)
         if: runner.os != 'Windows'
         run: ./gradlew --no-daemon assemble
 
-      - name: Run tests (Linux)
+      - name: Unit tests (Linux)
         if: runner.os != 'Windows'
         run: ./gradlew --no-daemon test
 
@@ -57,11 +61,15 @@ jobs:
         if: runner.os != 'Windows'
         run: ./gradlew --no-daemon run --args="--help"
 
+      - name: Ktlint check (Windows)
+        if: runner.os == 'Windows'
+        run: .\gradlew.bat --no-daemon ktlintCheck
+
       - name: Assemble project (Windows)
         if: runner.os == 'Windows'
         run: .\gradlew.bat --no-daemon assemble
 
-      - name: Run tests (Windows)
+      - name: Unit tests (Windows)
         if: runner.os == 'Windows'
         run: .\gradlew.bat --no-daemon test
 

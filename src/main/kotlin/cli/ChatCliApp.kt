@@ -16,73 +16,77 @@ class ChatCliApp(
     private val renderer: ConsoleRenderer = ConsoleRenderer(),
     private val readLineFn: () -> String? = ::readLine,
 ) {
-    suspend fun run(args: AppArgs) = coroutineScope {
-        val eventJob = launch {
-            transport.events.collect { event ->
-                renderer.printEvent(event)
-            }
-        }
-
-        try {
-            when (val mode = args.mode) {
-                is LaunchMode.Server -> {
-                    transport.startServer(
-                        StartServerCommand(
-                            selfName = args.selfName,
-                            port = mode.listenPort
-                        )
-                    )
+    suspend fun run(args: AppArgs) =
+        coroutineScope {
+            val eventJob =
+                launch {
+                    transport.events.collect { event ->
+                        renderer.printEvent(event)
+                    }
                 }
 
-                is LaunchMode.Client -> {
-                    transport.connect(
-                        ConnectCommand(
-                            selfName = args.selfName,
-                            peer = mode.peer
-                        )
-                    )
-                }
-            }
-
-            renderer.printWelcome(args)
-            inputLoop(args.selfName)
-        } finally {
             try {
-                transport.disconnect()
+                when (val mode = args.mode) {
+                    is LaunchMode.Server -> {
+                        transport.startServer(
+                            StartServerCommand(
+                                selfName = args.selfName,
+                                port = mode.listenPort,
+                            ),
+                        )
+                    }
+
+                    is LaunchMode.Client -> {
+                        transport.connect(
+                            ConnectCommand(
+                                selfName = args.selfName,
+                                peer = mode.peer,
+                            ),
+                        )
+                    }
+                }
+
+                renderer.printWelcome(args)
+                inputLoop(args.selfName)
             } finally {
-                eventJob.cancel()
-                transport.close()
+                try {
+                    transport.disconnect()
+                } finally {
+                    eventJob.cancel()
+                    transport.close()
+                }
             }
         }
-    }
 
-    private suspend fun inputLoop(selfName: String) = withContext(Dispatchers.IO) {
-        while (currentCoroutineContext().isActive) {
-            val line = readLineFn() ?: break
-            val trimmed = line.trim()
+    private suspend fun inputLoop(selfName: String) =
+        withContext(Dispatchers.IO) {
+            while (currentCoroutineContext().isActive) {
+                val line = readLineFn() ?: break
+                val trimmed = line.trim()
 
-            if (trimmed.isEmpty()) {
-                renderer.printPrompt()
-                continue
-            }
+                if (trimmed.isEmpty()) {
+                    renderer.printPrompt()
+                    continue
+                }
 
-            when (trimmed) {
-                "/help" -> renderer.printHelp()
-                "/exit" -> return@withContext
-                else -> {
-                    try {
-                        val sentMessage = transport.send(
-                            SendMessageCommand(
-                                sender = selfName,
-                                text = trimmed
-                            )
-                        )
-                        renderer.printOwnMessage(sentMessage)
-                    } catch (t: Throwable) {
-                        renderer.printError(t)
+                when (trimmed) {
+                    "/help" -> renderer.printHelp()
+                    "/exit" -> return@withContext
+                    else -> {
+                        try {
+                            val sentMessage =
+                                transport.send(
+                                    SendMessageCommand(
+                                        sender = selfName,
+                                        text = trimmed,
+                                    ),
+                                )
+                            renderer.printOwnMessage(sentMessage)
+                        } catch (t: Throwable) {
+                            renderer.printError(t)
+                        }
                     }
                 }
             }
         }
-    }
 }
