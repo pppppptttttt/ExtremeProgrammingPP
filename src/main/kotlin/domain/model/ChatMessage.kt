@@ -6,7 +6,7 @@ import java.util.UUID
 data class ChatMessage(
     val sender: String,
     val text: String,
-    val sentAt: Instant = Instant.now(),
+    val sentAt: Instant,
     val id: String = UUID.randomUUID().toString(),
 ) {
     init {

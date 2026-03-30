@@ -3,7 +3,6 @@ package domain.model
 sealed interface ChatEvent {
     data class MessageReceived(
         val message: ChatMessage,
-        val from: PeerInfo? = null
     ) : ChatEvent
 
     data class Connected(
