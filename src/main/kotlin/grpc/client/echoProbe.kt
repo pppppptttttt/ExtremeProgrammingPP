@@ -14,7 +14,7 @@ private val echoProbeLogger = Logger.getLogger("grpc.client.echoProbe")
 
 /**
  * Одно исходящее сообщение в bidirectional stream и одно входящее (эхо сервера).
- * Общий сценарий для ручного `--client` и для интеграционных тестов.
+ * Общий сценарий для интеграционных тестов (и при необходимости — отдельной утилиты).
  */
 fun echoProbe(client: ChatGrpcClient, sender: String, text: String): ChatMessage {
     val stub = client.asyncStub()
