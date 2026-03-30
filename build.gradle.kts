@@ -12,7 +12,7 @@ repositories {
     mavenCentral()
 }
 
-val grpcVersion = "1.68.2"
+val grpcVersion = "1.80.0"
 
 dependencies {
     implementation(project(":chat-api"))
