@@ -6,19 +6,19 @@ sealed interface ChatEvent {
     ) : ChatEvent
 
     data class Connected(
-        val peer: PeerInfo
+        val peer: PeerInfo,
     ) : ChatEvent
 
     data class Disconnected(
-        val peer: PeerInfo
+        val peer: PeerInfo,
     ) : ChatEvent
 
     data class System(
-        val text: String
+        val text: String,
     ) : ChatEvent
 
     data class Error(
         val text: String,
-        val cause: Throwable? = null
+        val cause: Throwable? = null,
     ) : ChatEvent
 }
